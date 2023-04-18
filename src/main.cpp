@@ -362,6 +362,11 @@ static string _pkcs11_tool(const string &module, const string &cmd, const string
 	return _pkcs11_tool(module, "--pin " + pin + " " + cmd);
 }
 
+static string _fiovb_setenv(const string &variable, const string &value)
+{
+	return _spawn("fiovb_setenv " + variable + " " + value)
+}
+
 static void _setenv(const char *name, const char *value)
 {
 	int rc = setenv(name, value, 1);
@@ -778,6 +783,10 @@ int main(int argc, char **argv)
 				sota_toml << "tls_pkey_id = \"" << hsm_tls_key_id << "\"" << endl;
 				sota_toml << "tls_clientcert_id = \"" << hsm_client_cert_id << "\"" << endl;
 				sota_toml << endl;
+
+				// Store hsm_so_pin in fiovb environment. This is needed when a full
+				// factory reset is run in order to clear the hsm token in slot 0.
+				_fiovb_setenv("hsm_so_pin", options.hsm_so_pin);
 			}
 		} else {
 			write_safely(name, it.second.data());
